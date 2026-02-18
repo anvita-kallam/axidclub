@@ -48,6 +48,14 @@ span {
   font-family: 'Nunito', sans-serif;
 }
 
+/* Alpha Xi Delta Greek letters - less rounded, more angular */
+.axid-greek {
+  font-family: 'Playfair Display', 'Times New Roman', serif;
+  font-weight: 700;
+  letter-spacing: 2px;
+  font-style: normal;
+}
+
 #root {
   min-height: 100vh;
 }
