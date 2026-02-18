@@ -1,13 +1,18 @@
 import { getTopMatches, generateMatchExplanation } from './rsoMatcher';
+import betxiImage from './betxi.jpg';
+import sportsImage from './sports.png';
 
 export default function Results({ userTags, onRestart }) {
   const matches = getTopMatches(userTags, 5);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cute-light-blue via-cute-light-yellow to-cute-light-blue py-12 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-cute-light-blue via-cute-light-yellow to-cute-light-blue py-12 px-4 relative">
+      <div className="max-w-4xl mx-auto relative z-10">
         {/* Header */}
         <div className="text-center mb-12">
+          <div className="text-5xl md:text-6xl font-bold text-cute-navy mb-4 drop-shadow-sm axid-greek">
+            ΑΞΔ
+          </div>
           <h1 className="text-4xl md:text-5xl font-bold text-cute-navy mb-4 drop-shadow-sm">
             Your Perfect Matches!
           </h1>
@@ -69,6 +74,24 @@ export default function Results({ userTags, onRestart }) {
           </button>
         </div>
       </div>
+      <div 
+        className="fixed bottom-0 right-0 w-96 h-96 md:w-[500px] md:h-[500px] opacity-60 pointer-events-none z-0"
+        style={{
+          backgroundImage: `url(${betxiImage})`,
+          backgroundSize: 'contain',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'bottom right'
+        }}
+      ></div>
+      <div 
+        className="fixed top-0 left-0 w-96 h-96 md:w-[500px] md:h-[500px] opacity-60 pointer-events-none z-0"
+        style={{
+          backgroundImage: `url(${sportsImage})`,
+          backgroundSize: 'contain',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'top left'
+        }}
+      ></div>
     </div>
   );
 }

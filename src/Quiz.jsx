@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Question from './Question';
+import betxiImage from './betxi.jpg';
+import sportsImage from './sports.png';
 
 const quizQuestions = [
   {
@@ -110,29 +112,55 @@ const quizQuestions = [
 export default function Quiz({ onComplete }) {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState([]);
+  const isProcessingRef = useRef(false);
+  const timeoutRef = useRef(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleAnswer = (value) => {
+    // Prevent multiple submissions during processing
+    if (isProcessingRef.current) return;
+    
+    // Clear any existing timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    isProcessingRef.current = true;
     const newAnswers = [...answers];
     newAnswers[currentQuestion] = value;
     setAnswers(newAnswers);
     
     // Move to next question after a short delay
-    setTimeout(() => {
-      if (currentQuestion < quizQuestions.length - 1) {
-        setCurrentQuestion(currentQuestion + 1);
-      } else {
-        // Quiz complete - aggregate all tags from all answers
-        // Keep duplicates to track frequency (important for matching algorithm)
-        const allTags = [];
-        newAnswers.forEach(answer => {
-          if (Array.isArray(answer)) {
-            allTags.push(...answer);
-          } else if (answer) {
-            allTags.push(answer);
-          }
-        });
-        // Pass all tags (with duplicates) to matching algorithm for frequency analysis
-        onComplete(allTags);
+    timeoutRef.current = setTimeout(() => {
+      try {
+        isProcessingRef.current = false;
+        if (currentQuestion < quizQuestions.length - 1) {
+          setCurrentQuestion(currentQuestion + 1);
+        } else {
+          // Quiz complete - aggregate all tags from all answers
+          // Keep duplicates to track frequency (important for matching algorithm)
+          const allTags = [];
+          newAnswers.forEach(answer => {
+            if (Array.isArray(answer)) {
+              allTags.push(...answer);
+            } else if (answer) {
+              allTags.push(answer);
+            }
+          });
+          // Pass all tags (with duplicates) to matching algorithm for frequency analysis
+          onComplete(allTags);
+        }
+      } catch (error) {
+        console.error('Error processing answer:', error);
+        isProcessingRef.current = false;
       }
     }, 500);
   };
@@ -148,9 +176,12 @@ export default function Quiz({ onComplete }) {
   const previousAnswer = answers[currentQuestion - 1];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cute-light-blue via-cute-light-yellow to-cute-light-blue py-12 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-cute-light-blue via-cute-light-yellow to-cute-light-blue py-12 px-4 relative">
+      <div className="max-w-4xl mx-auto relative z-10">
         <div className="text-center mb-8">
+          <div className="text-5xl md:text-6xl font-bold text-cute-navy mb-4 drop-shadow-sm axid-greek">
+            ΑΞΔ
+          </div>
           <h1 className="text-4xl md:text-5xl font-bold text-cute-navy mb-3 drop-shadow-sm">
             Find Your Perfect RSO Match
           </h1>
@@ -171,6 +202,24 @@ export default function Quiz({ onComplete }) {
           previousAnswer={previousAnswer}
         />
       </div>
+      <div 
+        className="fixed bottom-0 right-0 w-96 h-96 md:w-[500px] md:h-[500px] opacity-60 pointer-events-none z-0"
+        style={{
+          backgroundImage: `url(${betxiImage})`,
+          backgroundSize: 'contain',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'bottom right'
+        }}
+      ></div>
+      <div 
+        className="fixed top-0 left-0 w-96 h-96 md:w-[500px] md:h-[500px] opacity-60 pointer-events-none z-0"
+        style={{
+          backgroundImage: `url(${sportsImage})`,
+          backgroundSize: 'contain',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'top left'
+        }}
+      ></div>
     </div>
   );
 }
