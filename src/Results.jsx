@@ -68,7 +68,8 @@ export default function Results({ userTags, onRestart }) {
         <div className="text-center">
           <button
             onClick={onRestart}
-            className="px-8 py-4 bg-gradient-to-r from-cute-blue to-cute-yellow text-cute-navy rounded-2xl font-bold text-lg hover:shadow-lg transition-all duration-200 shadow-md transform hover:scale-105"
+            className="px-8 py-4 bg-gradient-to-r from-cute-blue to-cute-yellow text-cute-navy rounded-2xl font-bold text-lg hover:shadow-lg transition-all duration-200 shadow-md transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-cute-blue focus:ring-offset-2"
+            aria-label="Take the quiz again to find more RSO matches"
           >
             Take Quiz Again
           </button>
