@@ -79,6 +79,7 @@ export default function Question({ question, options, type, onAnswer, onBack, ca
                     ? 'scalloped-border-blue-selected bg-gradient-to-r from-cute-blue to-cute-yellow bg-opacity-20 shadow-lg'
                     : 'scalloped-border-blue bg-white hover:bg-cute-light-blue hover:bg-opacity-30 shadow-sm'
                 }`}
+                aria-label={option.label}
               >
                 <span className="text-lg font-medium text-cute-navy relative z-10">{option.label}</span>
               </button>
@@ -100,7 +101,8 @@ export default function Question({ question, options, type, onAnswer, onBack, ca
           {canGoBack && (
             <button
               onClick={onBack}
-              className="px-4 py-2 bg-white rounded-xl border-2 border-cute-blue border-opacity-30 text-cute-navy font-medium hover:bg-cute-light-blue hover:bg-opacity-30 transition-all duration-200 transform hover:scale-105 shadow-sm"
+              className="px-4 py-2 bg-white rounded-xl border-2 border-cute-blue border-opacity-30 text-cute-navy font-medium hover:bg-cute-light-blue hover:bg-opacity-30 transition-all duration-200 transform hover:scale-105 shadow-sm focus:outline-none focus:ring-2 focus:ring-cute-blue focus:ring-offset-2"
+              aria-label="Go back to previous question"
             >
               ← Back
             </button>
@@ -132,6 +134,7 @@ export default function Question({ question, options, type, onAnswer, onBack, ca
                   ? 'scalloped-border-blue-selected bg-gradient-to-r from-cute-blue to-cute-yellow bg-opacity-20 shadow-lg'
                   : 'scalloped-border-blue bg-white hover:bg-cute-light-blue hover:bg-opacity-30 shadow-sm'
               }`}
+              aria-label={option.label}
             >
               <span className="text-lg font-medium text-cute-navy relative z-10">{option.label}</span>
             </button>
