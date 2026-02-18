@@ -325,36 +325,52 @@ export function getTopMatches(userTags, count = 5) {
 
 // Generate explanation for why an RSO matches with improved messaging
 export function generateMatchExplanation(rso, userTags) {
-  const matchingTags = userTags.filter(tag => rso.tags.includes(tag));
+  // Remove duplicates from userTags first
+  const uniqueUserTags = [...new Set(userTags)];
+  const matchingTags = uniqueUserTags.filter(tag => rso.tags.includes(tag));
   
   if (matchingTags.length === 0) {
     return "This club offers opportunities that align with your interests!";
   }
   
-  // Separate primary and modifier tags
-  const primaryTags = matchingTags.filter(tag => {
+  // Separate primary and modifier tags, removing duplicates
+  const uniquePrimaryTags = [...new Set(matchingTags.filter(tag => {
     const config = tagKeywords[tag];
     return config && config.isPrimary;
-  });
-  const modifierTags = matchingTags.filter(tag => {
+  }))];
+  
+  const uniqueModifierTags = [...new Set(matchingTags.filter(tag => {
     const config = tagKeywords[tag];
     return config && !config.isPrimary;
+  }))];
+  
+  // Get RSO-specific tags (tags the RSO has that user might not have selected)
+  const rsoSpecificTags = rso.tags.filter(tag => {
+    const config = tagKeywords[tag];
+    return config && config.isPrimary && !uniquePrimaryTags.includes(tag);
   });
   
   const tagExplanations = {
-    'career': 'professional development and career growth',
-    'creative': 'creative expression and the arts',
-    'tech': 'technology and innovation',
-    'service': 'community service and making a difference',
-    'fitness': 'staying active and healthy',
-    'advocacy': 'advocacy and social change',
-    'low-commitment': 'flexible involvement',
-    'high-commitment': 'dedicated engagement'
+    'career': ['professional development', 'career growth', 'building your network', 'industry connections'],
+    'creative': ['creative expression', 'the arts', 'artistic pursuits', 'creative projects'],
+    'tech': ['technology', 'innovation', 'tech skills', 'cutting-edge projects'],
+    'service': ['community service', 'making a difference', 'helping others', 'giving back'],
+    'fitness': ['staying active', 'physical wellness', 'fitness activities', 'an active lifestyle'],
+    'advocacy': ['advocacy', 'social change', 'important causes', 'driving impact']
   };
   
+  // Different explanation templates for variety
+  const templates = [
+    (interests) => `Based on your quiz responses, ${interests} are important to you, and this club focuses on exactly that!`,
+    (interests) => `Your answers showed a strong interest in ${interests}, which aligns perfectly with what this club offers.`,
+    (interests) => `This club is ideal for you because it centers around ${interests}, matching what you're looking for.`,
+    (interests) => `You expressed interest in ${interests} throughout the quiz, and this club specializes in those areas.`,
+    (interests) => `Your quiz results highlighted ${interests} as priorities, and this club provides opportunities in those fields.`
+  ];
+  
   // Prioritize more important tags in explanation
-  const importantOrder = ['career', 'tech', 'service', 'advocacy', 'creative', 'fitness', 'high-commitment', 'low-commitment'];
-  const sortedPrimaryTags = primaryTags.sort((a, b) => {
+  const importantOrder = ['career', 'tech', 'service', 'advocacy', 'creative', 'fitness'];
+  const sortedPrimaryTags = uniquePrimaryTags.sort((a, b) => {
     const aIndex = importantOrder.indexOf(a);
     const bIndex = importantOrder.indexOf(b);
     if (aIndex === -1 && bIndex === -1) return 0;
@@ -363,27 +379,33 @@ export function generateMatchExplanation(rso, userTags) {
     return aIndex - bIndex;
   });
   
-  const explanations = sortedPrimaryTags
-    .slice(0, 3) // Limit to top 3 matching tags
-    .map(tag => tagExplanations[tag] || tag);
+  // Get unique explanations with variety
+  const uniqueExplanations = [];
+  const seenTags = new Set();
   
-  // Add commitment level info if relevant
-  if (modifierTags.length > 0 && explanations.length > 0) {
-    const commitment = modifierTags[0];
-    if (commitment === 'low-commitment') {
-      explanations.push('with flexible involvement');
-    } else if (commitment === 'high-commitment') {
-      explanations.push('with opportunities for dedicated engagement');
+  for (const tag of sortedPrimaryTags.slice(0, 2)) {
+    if (!seenTags.has(tag)) {
+      const explanations = tagExplanations[tag];
+      if (explanations) {
+        // Pick a random explanation variant for variety
+        const explanation = explanations[Math.floor(Math.random() * explanations.length)];
+        uniqueExplanations.push(explanation);
+        seenTags.add(tag);
+      }
     }
   }
   
-  if (explanations.length === 1) {
-    return `This club matches your interest in ${explanations[0]}.`;
-  } else if (explanations.length === 2) {
-    return `This club matches your interests in ${explanations[0]} and ${explanations[1]}.`;
+  // Use RSO name hash to pick a consistent template for this RSO
+  const rsoHash = rso.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const templateIndex = rsoHash % templates.length;
+  const template = templates[templateIndex];
+  
+  if (uniqueExplanations.length === 0) {
+    return "This club aligns with your interests!";
+  } else if (uniqueExplanations.length === 1) {
+    return template(uniqueExplanations[0]);
   } else {
-    const lastExplanation = explanations[explanations.length - 1];
-    const otherExplanations = explanations.slice(0, -1);
-    return `This club matches your interests in ${otherExplanations.join(', ')}, and ${lastExplanation}.`;
+    const interests = `${uniqueExplanations[0]} and ${uniqueExplanations[1]}`;
+    return template(interests);
   }
 }
