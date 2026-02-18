@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 
 export default function Question({ question, options, type, onAnswer, onBack, canGoBack, questionNumber, totalQuestions, previousAnswer }) {
-  const [selectedAnswer, setSelectedAnswer] = useState(previousAnswer || null);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
 
-  // Update selected answer when question changes
+  // Reset selected answer when question changes
   useEffect(() => {
-    setSelectedAnswer(previousAnswer || null);
-  }, [previousAnswer]);
+    if (previousAnswer !== undefined && previousAnswer !== null) {
+      setSelectedAnswer(previousAnswer);
+    } else {
+      setSelectedAnswer(null);
+    }
+  }, [questionNumber, previousAnswer]);
 
   const handleAnswer = (value) => {
     setSelectedAnswer(value);
@@ -48,7 +52,7 @@ export default function Question({ question, options, type, onAnswer, onBack, ca
               key={index}
               onClick={() => handleAnswer(option.value)}
               className={`w-full p-5 rounded-2xl transition-all duration-200 text-left transform hover:scale-[1.02] scalloped-border relative ${
-                JSON.stringify(selectedAnswer) === JSON.stringify(option.value)
+                selectedAnswer !== null && JSON.stringify(selectedAnswer) === JSON.stringify(option.value)
                   ? 'scalloped-border-blue-selected bg-gradient-to-r from-cute-blue to-cute-yellow bg-opacity-20 shadow-lg'
                   : 'scalloped-border-blue bg-white hover:bg-cute-light-blue hover:bg-opacity-30 shadow-sm'
               }`}
