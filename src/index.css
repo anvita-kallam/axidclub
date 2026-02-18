@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: 'Nunito', 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 1rem;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: 0.2px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Quicksand', 'Nunito', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+h1 {
+  font-size: 2.5rem;
+  line-height: 1.3;
+}
+
+h2 {
+  font-size: 2rem;
+  line-height: 1.4;
+}
+
+h3 {
+  font-size: 1.75rem;
+  line-height: 1.4;
+}
+
+button {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.3px;
+}
+
+p {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+span {
+  font-family: 'Nunito', sans-serif;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Force Tailwind to include custom colors */
+@layer utilities {
+  .text-cute-navy {
+    color: #1E3A8A;
+  }
+  .bg-cute-blue {
+    background-color: #93C5FD;
+  }
+  .bg-cute-yellow {
+    background-color: #FEF08A;
+  }
+  .bg-cute-light-blue {
+    background-color: #DBEAFE;
+  }
+  .bg-cute-light-yellow {
+    background-color: #FEF9C3;
+  }
+  .border-cute-blue {
+    border-color: #93C5FD;
+  }
+  .border-cute-yellow {
+    border-color: #FEF08A;
+  }
+  
+  /* Scalloped border effect - simple approach */
+  .scalloped-border {
+    position: relative;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+  }
+  
+  .scalloped-border::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    background-image: 
+      /* Top edge scallops */
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='6'%3E%3Cpath d='M0,6 Q5,0 10,0 T20,0 L20,6 Z' fill='%2393C5FD'/%3E%3C/svg%3E"),
+      /* Bottom edge scallops */
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='6'%3E%3Cpath d='M0,0 Q5,6 10,6 T20,6 L20,0 Z' fill='%2393C5FD'/%3E%3C/svg%3E"),
+      /* Left edge scallops */
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='20'%3E%3Cpath d='M6,0 Q0,5 0,10 T0,20 L6,20 Z' fill='%2393C5FD'/%3E%3C/svg%3E"),
+      /* Right edge scallops */
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='20'%3E%3Cpath d='M0,0 Q6,5 6,10 T6,20 L0,20 Z' fill='%2393C5FD'/%3E%3C/svg%3E");
+    background-size: 20px 6px, 20px 6px, 6px 20px, 6px 20px;
+    background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+    background-position: top, bottom, left, right;
+    border-radius: 20px;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.4;
+  }
+  
+  .scalloped-border-blue::before {
+    opacity: 0.3;
+  }
+  
+  .scalloped-border-blue-selected::before {
+    opacity: 0.7;
+    background-image: 
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='6'%3E%3Cpath d='M0,6 Q5,0 10,0 T20,0 L20,6 Z' fill='%2393C5FD'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='6'%3E%3Cpath d='M0,0 Q5,6 10,6 T20,6 L20,0 Z' fill='%23FEF08A'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='20'%3E%3Cpath d='M6,0 Q0,5 0,10 T0,20 L6,20 Z' fill='%2393C5FD'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='20'%3E%3Cpath d='M0,0 Q6,5 6,10 T6,20 L0,20 Z' fill='%23FEF08A'/%3E%3C/svg%3E");
+  }
+}
