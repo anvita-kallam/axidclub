@@ -173,7 +173,7 @@ export default function Quiz({ onComplete }) {
 
   const question = quizQuestions[currentQuestion];
   const canGoBack = currentQuestion > 0;
-  const previousAnswer = answers[currentQuestion - 1];
+  const previousAnswer = answers[currentQuestion]; // Answer for the CURRENT question
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cute-light-blue via-cute-light-yellow to-cute-light-blue py-12 px-4 relative">
