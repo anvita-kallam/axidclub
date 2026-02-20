@@ -273,51 +273,142 @@ export function getTopMatches(userTags, count = 5) {
       return bMatches - aMatches;
     })
     .filter(rso => rso.score > 0.15); // Only return RSOs with meaningful scores
+
+  // Group RSOs by broader score tiers for more variation
+  const scoreTiers = {
+    top: [],      // Top 20% of scores
+    high: [],     // Next 20%
+    medium: [],   // Next 30%
+    good: []      // Remaining 30%
+  };
   
-  // Ensure diversity in results - avoid too many similar RSOs
+  if (sortedRSOs.length > 0) {
+    const topScore = sortedRSOs[0].score;
+    const scoreRange = topScore - 0.15;
+    
+    sortedRSOs.forEach(rso => {
+      const scoreRatio = (rso.score - 0.15) / scoreRange;
+      if (scoreRatio >= 0.8) {
+        scoreTiers.top.push(rso);
+      } else if (scoreRatio >= 0.6) {
+        scoreTiers.high.push(rso);
+      } else if (scoreRatio >= 0.3) {
+        scoreTiers.medium.push(rso);
+      } else {
+        scoreTiers.good.push(rso);
+      }
+    });
+  }
+
+  // Shuffle all tiers for maximum variation
+  Object.keys(scoreTiers).forEach(tier => {
+    const group = scoreTiers[tier];
+    for (let i = group.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [group[i], group[j]] = [group[j], group[i]];
+    }
+  });
+
+  // Build a diverse selection from different tiers
   const topMatches = [];
   const usedTagCombinations = new Set();
+  const usedNames = new Set();
   
-  for (const rso of sortedRSOs) {
-    if (topMatches.length >= count) break;
+  // Strategy: Pick from different tiers with some randomness
+  const tierOrder = ['top', 'high', 'medium', 'good'];
+  let tierIndex = 0;
+  let attempts = 0;
+  const maxAttempts = sortedRSOs.length * 2;
+  
+  while (topMatches.length < count && attempts < maxAttempts) {
+    attempts++;
     
-    // Create a signature of the RSO's primary tags for diversity checking
+    // Cycle through tiers, but with some randomness
+    const currentTier = tierOrder[tierIndex % tierOrder.length];
+    const tierRSOs = scoreTiers[currentTier];
+    
+    if (tierRSOs.length === 0) {
+      tierIndex++;
+      continue;
+    }
+    
+    // Pick a random RSO from current tier
+    const randomIndex = Math.floor(Math.random() * tierRSOs.length);
+    const rso = tierRSOs[randomIndex];
+    
+    // Skip if already used
+    if (usedNames.has(rso.name)) {
+      tierIndex++;
+      continue;
+    }
+    
+    // Check for tag diversity (but be more lenient)
     const primaryTags = rso.tags.filter(tag => {
       const config = tagKeywords[tag];
       return config && config.isPrimary;
     }).sort().join(',');
     
-    // If we already have an RSO with very similar tags, skip unless score is much higher
-    if (usedTagCombinations.has(primaryTags)) {
-      // Only add if score is significantly higher than existing similar RSO
-      const similarRSO = topMatches.find(m => {
-        const mPrimaryTags = m.tags.filter(tag => {
-          const config = tagKeywords[tag];
-          return config && config.isPrimary;
-        }).sort().join(',');
-        return mPrimaryTags === primaryTags;
-      });
-      
-      if (similarRSO && rso.score > similarRSO.score + 0.1) {
-        // Replace the similar RSO with this one
-        const index = topMatches.indexOf(similarRSO);
-        topMatches[index] = rso;
-        continue;
-      } else {
-        continue; // Skip this RSO
-      }
+    // Only skip if we have 2+ RSOs with the exact same tag combination
+    const similarCount = topMatches.filter(m => {
+      const mPrimaryTags = m.tags.filter(tag => {
+        const config = tagKeywords[tag];
+        return config && config.isPrimary;
+      }).sort().join(',');
+      return mPrimaryTags === primaryTags;
+    }).length;
+    
+    // Allow up to 1 duplicate tag combination, then skip
+    if (similarCount >= 1 && topMatches.length >= 2) {
+      tierIndex++;
+      continue;
     }
     
+    // Add this RSO
     topMatches.push(rso);
     usedTagCombinations.add(primaryTags);
+    usedNames.add(rso.name);
+    
+    // Move to next tier for diversity
+    tierIndex++;
+    
+    // Occasionally jump back to top tier for quality
+    if (Math.random() < 0.3 && topMatches.length < count) {
+      tierIndex = 0;
+    }
   }
   
-  // If we don't have enough matches, fill with next best options
+  // If we still don't have enough, fill from any remaining RSOs
   if (topMatches.length < count) {
-    const remaining = sortedRSOs
-      .filter(rso => !topMatches.some(match => match.name === rso.name))
-      .slice(0, count - topMatches.length);
-    topMatches.push(...remaining);
+    const allRemaining = sortedRSOs
+      .filter(rso => !usedNames.has(rso.name))
+      .sort(() => Math.random() - 0.5); // Randomize
+    
+    const needed = count - topMatches.length;
+    topMatches.push(...allRemaining.slice(0, needed));
+  }
+  
+  // Final shuffle - only keep the absolute top match stable
+  if (topMatches.length > 1) {
+    const topOne = topMatches[0];
+    const rest = topMatches.slice(1);
+    
+    // Shuffle the rest completely
+    for (let i = rest.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [rest[i], rest[j]] = [rest[j], rest[i]];
+    }
+    
+    // Sometimes even shuffle the top one in (10% chance)
+    if (Math.random() < 0.1 && rest.length > 0) {
+      const shuffled = [topOne, ...rest];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+    
+    return [topOne, ...rest];
   }
   
   return topMatches;
